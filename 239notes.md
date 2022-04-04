@@ -48,6 +48,11 @@ All notes I have taken during this course and finished in April 2022.
 - After installing a service, we can make sure it's running (and enabled, to make sure it restarts at each machine restart). The command for this: `systemctl status ssh` (ssh is the name of the service here). We can check the port and protocole too. Contrary to Windows, we have a big visibility of what happens, so let's take advantage of it. 
 - Never use the machine with the `root` account more than just to setup the `admin` user (member of sudoers and has root like rights but with the sudo barrier).
 - No matter if we are in a local VM or on AWS, we can do frequent snapshots, it's okay to break things and restore to the last working state, even in cloud systems.
+- Never open MySQL access publicly, and never use FTP, both for security reasons
+- Never use SSH to login as root, this is only for the OS installation
+- Give the least rights as possible, for ex. the MySQL account for our app will have access only on its database
+- Document everything
+
 
 # General goal
 On our VM Debian Bullseye 11.2 Setup a web server with multiples websites with the following things installed and basically configured:
@@ -137,7 +142,7 @@ On your physical machine (or the one you use to connect remotely). Use Cmder.
 - You will then see at least `id_rsa_239` (private key) and `id_rsa_239.pub`.
 
 **Add the public key to the authorized keys list for a given account**:
-
+```shell
 //go the the user home folder as admin
 sudo su - <new_user>
 
@@ -151,6 +156,7 @@ chmod 600 .ssh/authorized_keys
 
 //add public key
 nano .ssh/authorized_keys
+```
 
 ### SSH login
 `ssh -i yourprivatekeyfile username@ipadresse`
