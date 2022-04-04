@@ -4,8 +4,8 @@ All notes I have taken during this course and finished in April 2022.
 - [ICT-239 notes](#ict-239-notes)
 - [General advice](#general-advice)
 - [General goal](#general-goal)
-		- [Packages](#packages)
-		- [Services](#services)
+	- [Packages](#packages)
+	- [Services](#services)
 - [Local training infrastructure](#local-training-infrastructure)
 	- [Integrity check of Debian Bullseye ISO image](#integrity-check-of-debian-bullseye-iso-image)
 	- [Work without sudo](#work-without-sudo)
@@ -52,11 +52,11 @@ All notes I have taken during this course and finished in April 2022.
 # General goal
 On our VM Debian Bullseye 11.2 Setup a web server with multiples websites with the following things installed and basically configured:
 
-### Packages
+## Packages
 - PHP v8.1
 - MySQL CLI
 
-### Services
+## Services
 - Apache: as web server
 - MySQL: to manage databases
 - SSH Server: to manage the server remotly
