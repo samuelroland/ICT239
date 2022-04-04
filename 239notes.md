@@ -3,6 +3,9 @@ All notes I have taken during this course and finished in April 2022.
 
 - [ICT-239 notes](#ict-239-notes)
 - [General advice](#general-advice)
+- [General goal](#general-goal)
+		- [Packages](#packages)
+		- [Services](#services)
 - [Local training infrastructure](#local-training-infrastructure)
 	- [Integrity check of Debian Bullseye ISO image](#integrity-check-of-debian-bullseye-iso-image)
 	- [Work without sudo](#work-without-sudo)
@@ -16,6 +19,8 @@ All notes I have taken during this course and finished in April 2022.
 	- [SSH](#ssh)
 		- [Install the SSH server](#install-the-ssh-server)
 		- [Disable root login via SSH](#disable-root-login-via-ssh)
+		- [SSH Connection](#ssh-connection)
+		- [SSH login](#ssh-login)
 	- [Managing services on Linux](#managing-services-on-linux)
 - [Remote infrastructure on AWS](#remote-infrastructure-on-aws)
 	- [Infrastructure](#infrastructure)
@@ -23,15 +28,17 @@ All notes I have taken during this course and finished in April 2022.
 	- [Setup users and database](#setup-users-and-database)
 	- [PHP installation](#php-installation)
 	- [Additionnal tools if needed](#additionnal-tools-if-needed)
-	- [Apps](#apps)
-- [Drupal](#drupal)
-	- [Enable extensions required for Drupal](#enable-extensions-required-for-drupal)
-- [Drupal setup](#drupal-setup)
-- [Get results stats](#get-results-stats)
+	- [Get results stats](#get-results-stats)
 	- [Configure VHosts](#configure-vhosts)
 		- [Setup the vhosts via the default config file](#setup-the-vhosts-via-the-default-config-file)
 		- [Setup the vhosts via separated config files](#setup-the-vhosts-via-separated-config-files)
-	- [Upload de fichiers](#upload-de-fichiers)
+	- [File uploads](#file-uploads)
+		- [Easy way: graphical interface](#easy-way-graphical-interface)
+		- [Hard way: via command line](#hard-way-via-command-line)
+	- [Apps](#apps)
+	- [Drupal](#drupal)
+		- [Enable extensions required for Drupal](#enable-extensions-required-for-drupal)
+		- [Drupal setup](#drupal-setup)
 
 # General advice
 - Before installing or using a package, just understand what is does and why we use it. Just have a quick look at the man page for this package.
@@ -40,11 +47,23 @@ All notes I have taken during this course and finished in April 2022.
 - A service produces all the time logs so we need to look at them when we have errors or to check we don't have.
 - After installing a service, we can make sure it's running (and enabled, to make sure it restarts at each machine restart). The command for this: `systemctl status ssh` (ssh is the name of the service here). We can check the port and protocole too. Contrary to Windows, we have a big visibility of what happens, so let's take advantage of it. 
 - Never use the machine with the `root` account more than just to setup the `admin` user (member of sudoers and has root like rights but with the sudo barrier).
+- No matter if we are in a local VM or on AWS, we can do frequent snapshots, it's okay to break things and restore to the last working state, even in cloud systems.
+
+# General goal
+On our VM Debian Bullseye 11.2 Setup a web server with multiples websites with the following things installed and basically configured:
+
+### Packages
+- PHP v8.1
+- MySQL CLI
+
+### Services
+- Apache: as web server
+- MySQL: to manage databases
+- SSH Server: to manage the server remotly
 
 # Local training infrastructure
 The VM runs in VMWare 16.1.0.
 ![localinfra](localinfra.png)
-
 
 ## Integrity check of Debian Bullseye ISO image
 
@@ -76,7 +95,7 @@ Then `apt-get update && apt-get upgrade` to update the repository and our distri
 ## Creating the admin user
 We have `cpnv` and `root`, but we need to create a second admin account that can install packages but cannot break everything like the root account.
 
-Create the user: `sudo /sbin/adduser admin` and enter a password.
+Create the user: `sudo /sbin/adduser admin` and enter a password. (Append `--disabled-password` if no password need to be disabled)
 
 Granting rights to `admin`: 
 ```bash
@@ -85,7 +104,6 @@ sudo visudo
 ```
 Add: `apacheadmin ALL=(ALL) NOPASSWD:ALL`.
 You can now use the `admin` user by default for the administration and never use `root` again.
-
 
 
 ### Set language to English
@@ -108,6 +126,18 @@ Then run `dpkg-reconfigure locales` (utility is in `usr/sbin` so the environment
 
 ### Disable root login via SSH
 To disable login with root via SSH, you can modify `/etc/ssh/sshd_config` and change `PermitRootLogin` to `no`.
+
+### SSH Connection
+
+**Create a SSH key pair**:  
+On your physical machine (or the one you use to connect remotely). Use Cmder.
+- Go in the folder where you want to store your keys
+- Run `ssh-keygen`
+- Rename file to `id_rsa_239` (this will place the keys in your current folder)
+- You will then see at least `id_rsa_239` (private key) and `id_rsa_239.pub`.
+
+### SSH login
+`ssh -i yourprivatekeyfile username@ipadresse`
 
 ## Managing services on Linux
 
@@ -150,6 +180,8 @@ sudo apt install mariadb-server -y
 sudo mysql_secure_installation
 # enter a root password and Enter to all following questions
 ```
+
+Apache logs are in `/var/log/apache2/access.log`. Default website root folder is `/var/www/html`.
 
 ## Setup users and database
 This is SQL script to run manually after login with `mysql -u root -p`. We would like to create an SQL user reachable only on localhost. (If you want to make it connectable from whatever machine, just use %: 'myuser'@'%').
@@ -204,47 +236,7 @@ rm composer-setup.php
 sudo apt install git
 ```
 
-## Apps
-drupal requirements
-php 7.3
-mariadb 10.3.7
-apache 2.4.7
-
-wordpress
-php 7.4
-mariadb 10.2
-
-installé
-apache 2.4.52
-7.4
-
-# Drupal
-This is an not working attempt to install Drupal.
-
-## Enable extensions required for Drupal
-```shell
-sudo chmod 777 /etc/php/8.0/cli/php.ini
-yes | sudo apt install unzip
-yes | sudo apt install php8.0-dom
-yes | sudo apt install php8.0-gd
-yes | sudo apt install php8.0-zip
-yes | sudo apt install php8.0-pdo-mysql
-
-sudo echo "extension=dom" >> /etc/php/8.0/cli/php.ini
-sudo echo "extension=zip" >> /etc/php/8.0/cli/php.ini
-sudo echo "extension=pdo_mysql" >> /etc/php/8.0/cli/php.ini
-sudo echo "extension=openssl" >> /etc/php/8.0/cli/php.ini
-sudo echo "extension=curl" >> /etc/php/8.0/cli/php.ini
-sudo echo "extension=sodium" >> /etc/php/8.0/cli/php.ini
-sudo chmod 744 /etc/php/8.0/cli/php.ini
-```
-
-# Drupal setup
-```
-composer create-project drupal/recommended-project /var/www/drupal
-```
-
-# Get results stats
+## Get results stats
 ```
 systemctl status mariadb
 php -v
@@ -297,7 +289,7 @@ DocumentRoot /var/www/site1
 Everytime you change a configuration file, you need to reload apache: `sudo systemctl reload apache2`.
 
 ```shell
-## 3 useful commands you should know about.
+## 3 useful commands you should know.
 
 ## Enable the website for the first time
 sudo a2ensite monsite1.ch
@@ -309,8 +301,66 @@ sudo a2dissite monsite1.ch
 sudo systemctl reload apache2
 ```
 
-## Upload de fichiers
+## File uploads
+### Easy way: graphical interface
 - Use filezilla with a SFTP connection using:
     - hostname: localhost
     - port: 23
     - identity file: your key file in PEM format (or PPK)
+
+### Hard way: via command line
+TODO: finish document this with rsync
+<!-- commandes en cours.
+NOT WORKING !
+
+envoi des fichiers dans partagex login template folder.
+
+rsync * -e 'ssh -i C:\Users\samuel.roland\.ssh\vm239' admin@192.168.88.128:/var/www/html/ -r --rsync-path="sudo rsync"
+
+ssh admin@192.168.88.128
+
+-->
+
+
+----
+Advanced part...
+
+## Apps
+drupal requirements
+php 7.3
+mariadb 10.3.7
+apache 2.4.7
+
+wordpress
+php 7.4
+mariadb 10.2
+
+installé
+apache 2.4.52
+7.4
+
+## Drupal
+This is an NOT WORKING attempt to install Drupal.
+
+### Enable extensions required for Drupal
+```shell
+sudo chmod 777 /etc/php/8.0/cli/php.ini
+yes | sudo apt install unzip
+yes | sudo apt install php8.0-dom
+yes | sudo apt install php8.0-gd
+yes | sudo apt install php8.0-zip
+yes | sudo apt install php8.0-pdo-mysql
+
+sudo echo "extension=dom" >> /etc/php/8.0/cli/php.ini
+sudo echo "extension=zip" >> /etc/php/8.0/cli/php.ini
+sudo echo "extension=pdo_mysql" >> /etc/php/8.0/cli/php.ini
+sudo echo "extension=openssl" >> /etc/php/8.0/cli/php.ini
+sudo echo "extension=curl" >> /etc/php/8.0/cli/php.ini
+sudo echo "extension=sodium" >> /etc/php/8.0/cli/php.ini
+sudo chmod 744 /etc/php/8.0/cli/php.ini
+```
+
+### Drupal setup
+```
+composer create-project drupal/recommended-project /var/www/drupal
+```
