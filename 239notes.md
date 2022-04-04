@@ -136,6 +136,22 @@ On your physical machine (or the one you use to connect remotely). Use Cmder.
 - Rename file to `id_rsa_239` (this will place the keys in your current folder)
 - You will then see at least `id_rsa_239` (private key) and `id_rsa_239.pub`.
 
+**Add the public key to the authorized keys list for a given account**:
+
+//go the the user home folder as admin
+sudo su - <new_user>
+
+//create .ssh folder with adapted rights
+mkdir .ssh
+chmod 700 .ssh
+
+//create authorized_keys with adapted rights
+touch .ssh/authorized_keys
+chmod 600 .ssh/authorized_keys
+
+//add public key
+nano .ssh/authorized_keys
+
 ### SSH login
 `ssh -i yourprivatekeyfile username@ipadresse`
 
